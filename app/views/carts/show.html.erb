@@ -15,8 +15,9 @@
         </tr>
       </thead>
       <tbody>
-        <% enhanced_cart.each do |item| %>
-          <%= render 'item', product: item[:product], quantity: item[:quantity].to_i %>
+        <% @cart_total = 0 %>
+        <% cart.each do |product_id, details| %>
+          <%= render 'item', product_id: product_id, details: details %>
         <% end %>
       </tbody>
       <tfoot>
@@ -25,7 +26,7 @@
             TOTAL:
           </th>
           <th>
-            <%= cart_subtotal_cents / 100.0 %>
+            <%= @cart_total %>
           </th>
         </tr>
       </tfoot>
@@ -38,11 +39,11 @@
         <script
           src="https://checkout.stripe.com/checkout.js" class="stripe-button"
           data-key="<%= Rails.configuration.stripe[:publishable_key] %>"
-          data-amount="<%= cart_subtotal_cents %>"
+          data-amount="<%= @cart_total * 100 %>"
           data-name="Jungle"
-          data-description="Khurram Virani's Jungle Order"
+          data-description="<%= current_user ? current_user.first_name + " " + current_user.last_name : 'Khurram Virani' %>'s Jungle Order"
           data-locale="auto"
-          data-email="kvirani@gmail.com"
+          data-email="<%= current_user ? current_user.email : 'kvirani@gmail.com' %>"
           data-currency="cad">
         </script>
       <% end %>
