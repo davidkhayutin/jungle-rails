@@ -1,27 +1,28 @@
 class ReviewsController < ApplicationController
-   def create
-    @product_id = params[:product_id]
-    review = Review.new(review_params)
-    review.user_id = current_user.id
-    review.product_id = @product_id
-     if review.save
-      redirect_to product_path(id: @product_id), notice: 'Review created!'
-    else
-      redirect_to product_path(id: @product_id)
+
+    #before_filter :authorize
+
+    def create
+        @product = Product.find(params[:product_id])
+        @review = @product.reviews.create(review_params)
+
+        if @review.save
+            redirect_to @product, notice: 'Review has been submitted!'
+        else
+            redirect_to @product, notice: "Errors"
+        end
     end
-   end
-   def remove_item
-    @review_id = params[:review_id]
-    @product_id = params[:product_id]
-    @review = Review.find_by(id: @review_id)
-    @review.destroy
-    redirect_to product_path(id: @product_id)
-  end
-   private
-   def review_params
-    params.require(:review).permit(
-      :rating,
-      :description,
-    )
-  end
- end
+
+    def destroy
+        @review = Review.find(params[:id])
+        @product = Product.find(params[:product_id])
+        @review.destroy!
+        redirect_to @product, notice: "Errors"
+    end
+
+    private
+    def review_params
+        params.require(:review).permit(:description, :rating).merge(user: current_user)
+    end
+
+end

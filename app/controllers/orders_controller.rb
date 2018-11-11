@@ -2,15 +2,18 @@ class OrdersController < ApplicationController
 
   def show
     @order = Order.find(params[:id])
+    @order_items = LineItem.where(order_id: params[:id])
   end
 
   def create
     charge = perform_stripe_charge
     order  = create_order(charge)
+    email = current_user ? current_user.email : charge.source.name
 
     if order.valid?
       empty_cart!
-      redirect_to order, notice: 'Your Order has been placed.'
+      UserMailer.order_email(order, email).deliver_now
+      redirect_to order_path(order), notice: 'Your Order has been placed.'
     else
       redirect_to cart_path, flash: { error: order.errors.full_messages.first }
     end
@@ -29,7 +32,7 @@ class OrdersController < ApplicationController
   def perform_stripe_charge
     Stripe::Charge.create(
       source:      params[:stripeToken],
-      amount:      cart_subtotal_cents,
+      amount:      cart_total, # in cents
       description: "Khurram Virani's Jungle Order",
       currency:    'cad'
     )
@@ -38,22 +41,33 @@ class OrdersController < ApplicationController
   def create_order(stripe_charge)
     order = Order.new(
       email: params[:stripeEmail],
-      total_cents: cart_subtotal_cents,
+      total_cents: cart_total,
       stripe_charge_id: stripe_charge.id, # returned by stripe
     )
-
-    enhanced_cart.each do |entry|
-      product = entry[:product]
-      quantity = entry[:quantity]
-      order.line_items.new(
-        product: product,
-        quantity: quantity,
-        item_price: product.price,
-        total_price: product.price * quantity
-      )
+    cart.each do |product_id, details|
+      if product = Product.find_by(id: product_id)
+        quantity = details['quantity'].to_i
+        order.line_items.new(
+          product: product,
+          quantity: quantity,
+          item_price: product.price,
+          total_price: product.price * quantity
+        )
+      end
     end
     order.save!
     order
+  end
+
+  # returns total in cents not dollars (stripe uses cents as well)
+  def cart_total
+    total = 0
+    cart.each do |product_id, details|
+      if p = Product.find_by(id: product_id)
+        total += p.price_cents * details['quantity'].to_i
+      end
+    end
+    total
   end
 
 end

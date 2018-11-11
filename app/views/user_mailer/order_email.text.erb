@@ -1,0 +1,16 @@
+
+This is a confirmation receipt for your recent purchase on Jungle
+===============================================
+ 
+
+Here is your order summary
+
+<% @order.line_items.each do |item| %>
+    <%= item.product.name %>
+    <%= item.product.description %>
+<% end %>
+
+Your total:
+<%= @order.total %>
+ 
+Enjoy your purchase and see you again!

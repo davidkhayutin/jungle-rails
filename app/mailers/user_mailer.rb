@@ -1,12 +1,10 @@
 class UserMailer < ApplicationMailer
 
-  def order_email(user_name, user_email, order, total_amount)
+    default from: 'no-reply@jungle.com'
 
-      @user_name = user_name
-      @order = order
-      @total_amount = total_amount
-      mail(to: user_email, subject: "Thank you for your order ##{@order.id}")
-
-  end
-
+    def order_email(order, email)
+        @order = order
+        @email = email
+        mail(to: 'david.khayutin@gmail.com', subject: "Thank you for your recent purchase! This is your order ID: #{order.id}")
+    end
 end

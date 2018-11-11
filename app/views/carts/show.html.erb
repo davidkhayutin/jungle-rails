@@ -4,8 +4,7 @@
     <h1>My Cart</h1>
   </header>
 
-  <% if cart.size > 0 %>
-
+  <% if cart.size != 0 %>
     <div class="panel panel-default items">
       <table class="table table-bordered">
         <thead>
@@ -28,7 +27,7 @@
               TOTAL:
             </th>
             <th>
-              <%= @cart_total %>
+              <%= humanized_money_with_symbol  @cart_total %>
             </th>
           </tr>
         </tfoot>
@@ -41,24 +40,19 @@
           <script
             src="https://checkout.stripe.com/checkout.js" class="stripe-button"
             data-key="<%= Rails.configuration.stripe[:publishable_key] %>"
-            data-amount="<%= @cart_total * 100 %>"
+            data-amount="<%= humanized_money_with_symbol  @cart_total * 100 %>"
             data-name="Jungle"
-            data-description="<%= current_user ? current_user.first_name + " " + current_user.last_name : 'Khurram Virani' %>'s Jungle Order"
+            data-description="Your Jungle Order"
             data-locale="auto"
-            data-email="<%= current_user ? current_user.email : 'kvirani@gmail.com' %>"
+            data-email="<%= current_user ? current_user.email : '' %>"
             data-currency="cad">
           </script>
         <% end %>
       </div>
     </div>
-
-  <% else %>
-
-    <div>
-      <h4>Your cart is empty</h4><br>
-      <%= link_to "Continue Shopping", root_path, class: 'btn btn-lg btn-primary' %>
-    </div>
-
-  <% end %>
+    <% else %>
+        <h3>Your cart is empty!</h3>
+        <%= link_to '🏷 Let\'s get shopping!', root_url, class: 'btn btn-info' %>
+    <% end %>
 
 </section>
