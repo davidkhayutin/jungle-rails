@@ -96,7 +96,7 @@ cat2.products.create!({
   name:  'Hotdog Slicer',
   description: Faker::Hipster.paragraph(4),
   image: open_asset('electronics2.jpg'),
-  quantity: 0,
+  quantity: 3,
   price: 26.00
 })
 
@@ -120,7 +120,7 @@ cat3.products.create!({
   name:  'Electric Chair',
   description: Faker::Hipster.paragraph(4),
   image: open_asset('furniture2.jpg'),
-  quantity: 0,
+  quantity: 2,
   price: 987.65
 })
 
@@ -131,6 +131,14 @@ cat3.products.create!({
   quantity: 23,
   price: 2_483.75
 })
+
+Review.destroy_all
+
+
+Review.create(product_id: 1, user_id: '', description: "test", rating: "3")
+Review.create(product_id: 1, user_id: '', description: "test2", rating: "4")
+Review.create(product_id: 1, user_id: '', description: "test3", rating: "5")
+
 
 
 puts "DONE!"
